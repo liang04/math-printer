@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1.5cm 1cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "STKaiti", "KaiTi", "楷体", "SimSun", "宋体", sans-serif;
+            color: #333;
+            padding: 0;
+        }
+
+        .worksheet {
+            width: 100%;
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #0cc;
+            padding-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            row-gap: 20px;
+            column-gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .question {
+            font-size: 20px;
+            font-family: "Consolas", "Monaco", "Courier New", monospace;
+            display: flex;
+            align-items: center;
+        }
+
+        .question .expr {
+            display: inline-block;
+            width: 180px;
+            text-align: right;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        .mixed-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            row-gap: 25px;
+            column-gap: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="worksheet">
+        <div class="title">{{title}}</div>
+        <div class="header-info">
+            <span>姓名：_________</span>
+            <span>班级：_________</span>
+            <span>日期：_________</span>
+            <span>得分：_________</span>
+        </div>
+
+        <div class="grid">
+            {{#oral}}
+            <div class="question">
+                <span class="expr">{{text}}</span> = ______
+            </div>
+            {{/oral}}
+        </div>
+
+        <div class="mixed-grid">
+            {{#mixed}}
+            <div class="question">
+                <span class="expr">{{text}}</span> = ______
+            </div>
+            {{/mixed}}
+        </div>
+    </div>
+</body>
+</html>
