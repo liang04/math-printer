@@ -6,11 +6,8 @@ services:
     container_name: math-printer
     ports:
       - "3000:3000"
-    environment:
-      - PORT=3000
-      - PRINTER_IP=192.168.31.206
-      - PRINTER_PORT=631
-      - NODE_ENV=production
+    env_file:
+      - .env
     restart: unless-stopped
     networks:
       - printer-net
