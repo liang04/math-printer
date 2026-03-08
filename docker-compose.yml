@@ -9,9 +9,5 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    networks:
-      - printer-net
-
-networks:
-  printer-net:
-    driver: bridge
+    # 使用 host 网络模式，使容器可以访问局域网打印机
+    network_mode: host

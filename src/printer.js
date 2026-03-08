@@ -1,48 +1,65 @@
 /**
- * 打印机模块 - 使用 IPP 协议
+ * 打印机模块 - 使用 RAW (JetDirect) 协议
+ * EPSON L4160 使用 9100 端口
  */
 
-const ipp = require('ipp');
+const net = require('net');
 
 const PRINTER_IP = process.env.PRINTER_IP || '192.168.31.206';
-const PRINTER_PORT = process.env.PRINTER_PORT || 631;
+const PRINTER_PORT = process.env.PRINTER_RAW_PORT || 9100;
 
-const PRINTER_URL = `http://${PRINTER_IP}:${PRINTER_PORT}/ipp/print`;
+const PRINTER_URL = `tcp://${PRINTER_IP}:${PRINTER_PORT}`;
 
 /**
- * 打印 PDF 文件
+ * 打印 PDF 文件 (RAW 方式)
  * @param {Buffer} pdfBuffer - PDF 数据
  * @param {string} jobName - 打印任务名称
  * @returns {Promise<{jobId: number, status: string}>}
  */
 async function printPDF(pdfBuffer, jobName = 'math-worksheet') {
-  const printer = ipp.Printer(PRINTER_URL);
-
-  const msg = {
-    "operation-attributes-tag": {
-      "requesting-user-name": "math-printer",
-      "job-name": jobName,
-      "document-format": "application/pdf"
-    },
-    data: pdfBuffer
-  };
-
   return new Promise((resolve, reject) => {
-    printer.execute("Print-Job", msg, (err, res) => {
-      if (err) {
-        reject(new Error(`打印失败: ${err.message}`));
-        return;
-      }
+    const socket = new net.Socket();
+    let timeout;
 
-      const status = res?.['job-attributes-tag']?.['job-state'] || 'unknown';
-      const jobId = res?.['job-attributes-tag']?.['job-id'] || 0;
+    // 设置超时
+    timeout = setTimeout(() => {
+      socket.destroy();
+      reject(new Error('打印超时'));
+    }, 30000);
 
-      resolve({
-        jobId,
-        status,
-        printerUrl: PRINTER_URL
+    socket.on('connect', () => {
+      console.log(`已连接到打印机: ${PRINTER_IP}:${PRINTER_PORT}`);
+      // 发送 PDF 数据
+      socket.write(pdfBuffer, (err) => {
+        if (err) {
+          clearTimeout(timeout);
+          socket.destroy();
+          reject(new Error(`发送数据失败: ${err.message}`));
+          return;
+        }
+        // 结束连接
+        socket.end();
       });
     });
+
+    socket.on('close', (hadError) => {
+      clearTimeout(timeout);
+      if (!hadError) {
+        resolve({
+          jobId: Date.now(),
+          status: 'sent',
+          printerUrl: PRINTER_URL
+        });
+      }
+    });
+
+    socket.on('error', (err) => {
+      clearTimeout(timeout);
+      reject(new Error(`打印失败: ${err.message}`));
+    });
+
+    // 连接打印机
+    socket.connect(PRINTER_PORT, PRINTER_IP);
   });
 }
 
@@ -51,21 +68,33 @@ async function printPDF(pdfBuffer, jobName = 'math-worksheet') {
  * @returns {Promise<{connected: boolean, state?: string}>}
  */
 async function checkPrinterStatus() {
-  const printer = ipp.Printer(PRINTER_URL);
-
   return new Promise((resolve) => {
-    printer.execute("Get-Printer-Attributes", null, (err, res) => {
-      if (err) {
-        resolve({ connected: false, error: err.message });
-        return;
-      }
+    const socket = new net.Socket();
+    let timeout;
 
-      const state = res?.['printer-attributes-tag']?.['printer-state'];
+    timeout = setTimeout(() => {
+      socket.destroy();
+      resolve({ connected: false, error: '连接超时' });
+    }, 5000);
+
+    socket.on('connect', () => {
+      clearTimeout(timeout);
+      socket.destroy();
       resolve({
         connected: true,
-        state: state === 3 ? 'idle' : state === 4 ? 'processing' : 'stopped'
+        state: 'idle'
       });
     });
+
+    socket.on('error', (err) => {
+      clearTimeout(timeout);
+      resolve({
+        connected: false,
+        error: err.message
+      });
+    });
+
+    socket.connect(PRINTER_PORT, PRINTER_IP);
   });
 }
 
