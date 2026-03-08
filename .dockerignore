@@ -4,3 +4,15 @@ npm-debug.log
 .gitignore
 README.md
 docs
+.env
+.env.*
+Dockerfile
+.dockerignore
+.DS_Store
+*.log
+test
+tests
+__tests__
+.vscode
+.idea
+coverage
