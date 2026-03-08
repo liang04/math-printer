@@ -143,7 +143,7 @@ function generateWorksheet(options = {}) {
 
   return {
     oral: shuffle(oral),
-    mixed: mixed
+    mixed: shuffle(mixed)
   };
 }
 
