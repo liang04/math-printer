@@ -7,7 +7,7 @@
 - 生成 100 以内加减法、表内乘除法题目
 - 生成含运算优先级的混合运算题
 - 支持指定题目数量、打印份数
-- 使用 IPP 协议直连网络打印机
+- 使用 RAW (JetDirect) 协议直连网络打印机
 
 ## 快速开始
 
@@ -62,7 +62,7 @@ curl -X POST http://localhost:3000/api/preview \
 |------|--------|------|
 | PORT | 3000 | 服务端口 |
 | PRINTER_IP | 192.168.31.206 | 打印机 IP |
-| PRINTER_PORT | 631 | IPP 端口 |
+| PRINTER_RAW_PORT | 9100 | RAW (JetDirect) 端口 |
 
 ## 项目结构
 
@@ -78,7 +78,7 @@ templates/
 
 ## 打印机兼容性
 
-已在 EPSON L4160 上测试。其他支持 IPP 协议的网络打印机理论兼容。
+已在 EPSON L4160 上测试。该打印机使用 RAW (JetDirect) 协议（端口 9100）。其他支持 RAW 协议的网络打印机理论兼容。
 
 ## 开发
 
