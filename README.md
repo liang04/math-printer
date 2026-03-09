@@ -6,8 +6,9 @@
 
 - 生成 100 以内加减法、表内乘除法题目
 - 生成含运算优先级的混合运算题
-- 支持指定题目数量、打印份数
-- 使用 RAW (JetDirect) 协议直连网络打印机
+- 支持难度等级（level 1-18），总题数固定 34 道
+- 支持指定打印份数
+- 使用 CUPS + ESC/P-R 驱动打印到 EPSON 打印机
 
 ## 快速开始
 
@@ -39,18 +40,35 @@ curl -X POST http://localhost:3000/api/print \
   -H "Content-Type: application/json" \
   -d '{
     "count": 1,
-    "questions": 26,
-    "mixedCount": 8,
+    "level": 1,
     "title": "数学口算练习"
   }'
 ```
+
+**参数说明**
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `count` | number | 1 | 打印份数 (1-10) |
+| `level` | number | 1 | 难度等级 (1-18)，每级增加 2 道混合运算 |
+| `title` | string | "数学口算练习" | 试卷标题 |
+
+**难度等级**
+
+| Level | 简单算式 | 混合运算 | 总计 |
+|-------|----------|----------|------|
+| 1 | 34 | 0 | 34 |
+| 2 | 32 | 2 | 34 |
+| 3 | 30 | 4 | 34 |
+| ... | ... | ... | 34 |
+| 18 | 0 | 34 | 34 |
 
 ### 预览 PDF（不打印）
 
 ```bash
 curl -X POST http://localhost:3000/api/preview \
   -H "Content-Type: application/json" \
-  -d '{"questions": 26, "mixedCount": 8}' \
+  -d '{"level": 3}' \
   -o worksheet.pdf
 ```
 
@@ -78,7 +96,12 @@ templates/
 
 ## 打印机兼容性
 
-已在 EPSON L4160 上测试。该打印机使用 RAW (JetDirect) 协议（端口 9100）。其他支持 RAW 协议的网络打印机理论兼容。
+已在 EPSON L4160 上测试。使用 CUPS + ESC/P-R 驱动通过 RAW (JetDirect) 协议打印（端口 9100）。
+
+### 已解决问题
+
+- **打印乱码**: 使用 CUPS + ESC/P-R 驱动替代直接 socket 发送
+- **中文显示**: 安装 Noto CJK 中文字体
 
 ## 开发
 
