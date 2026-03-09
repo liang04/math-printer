@@ -8,9 +8,9 @@ sleep 2
 
 # 配置打印机
 PRINTER_IP=${PRINTER_IP:-192.168.31.206}
-PRINTER_PORT=${PRINTER_RAW_PORT:-9100}
-PRINTER_URI="socket://${PRINTER_IP}:${PRINTER_PORT}"
-PRINTER_NAME="epson_l4160"
+PRINTER_RAW_PORT=${PRINTER_RAW_PORT:-9100}
+PRINTER_URI="socket://${PRINTER_IP}:${PRINTER_RAW_PORT}"
+PRINTER_NAME=${PRINTER_NAME:-epson_l4160}
 
 # PPD 文件路径
 PPD_PATH="/usr/share/ppd/epson-inkjet-printer-escpr/Epson-L4160_Series-epson-escpr-en.ppd"
