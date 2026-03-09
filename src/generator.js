@@ -117,11 +117,12 @@ function generateWorksheet(options = {}) {
 
   const oral = [];
 
-  // 分配口算题: 12 加法, 12 减法, 1 乘法, 1 除法
-  const additionCount = Math.min(12, Math.floor(questionCount * 0.46));
-  const subtractionCount = Math.min(12, Math.floor(questionCount * 0.46));
+  // 分配口算题: 乘除法各 1 道，其余分配给加减法
   const multiplicationCount = 1;
   const divisionCount = 1;
+  const remainingCount = questionCount - multiplicationCount - divisionCount;
+  const additionCount = Math.floor(remainingCount / 2);
+  const subtractionCount = remainingCount - additionCount;
 
   for (let i = 0; i < additionCount; i++) {
     oral.push(generateAddition());
