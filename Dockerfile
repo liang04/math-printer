@@ -28,7 +28,27 @@ RUN apk add --no-cache \
     freetype \
     harfbuzz \
     ttf-freefont \
+    font-noto-cjk \
     && rm -rf /var/cache/apk/*
+
+# 配置中文字体
+RUN echo '<?xml version="1.0"?>' > /etc/fonts/local.conf && \
+    echo '<!DOCTYPE fontconfig SYSTEM "fonts.dtd">' >> /etc/fonts/local.conf && \
+    echo '<fontconfig>' >> /etc/fonts/local.conf && \
+    echo '    <alias>' >> /etc/fonts/local.conf && \
+    echo '        <family>sans-serif</family>' >> /etc/fonts/local.conf && \
+    echo '        <prefer>' >> /etc/fonts/local.conf && \
+    echo '            <family>Noto Sans CJK SC</family>' >> /etc/fonts/local.conf && \
+    echo '        </prefer>' >> /etc/fonts/local.conf && \
+    echo '    </alias>' >> /etc/fonts/local.conf && \
+    echo '    <alias>' >> /etc/fonts/local.conf && \
+    echo '        <family>serif</family>' >> /etc/fonts/local.conf && \
+    echo '        <prefer>' >> /etc/fonts/local.conf && \
+    echo '            <family>Noto Serif CJK SC</family>' >> /etc/fonts/local.conf && \
+    echo '        </prefer>' >> /etc/fonts/local.conf && \
+    echo '    </alias>' >> /etc/fonts/local.conf && \
+    echo '</fontconfig>' >> /etc/fonts/local.conf && \
+    fc-cache -fv
 
 # 配置 CUPS 允许远程管理（本地使用）
 RUN echo "Listen *:631" >> /etc/cups/cupsd.conf && \
