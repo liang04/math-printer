@@ -47,9 +47,14 @@
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            row-gap: 21px;
+            row-gap: 25px;
             column-gap: 30px;
             margin-bottom: 30px;
+        }
+
+        .grid .question:first-child,
+        .grid .question:nth-child(2) {
+            margin-top: 15px;
         }
 
         .question {
@@ -70,8 +75,13 @@
         .mixed-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            row-gap: 21px;
+            row-gap: 25px;
             column-gap: 30px;
+        }
+
+        .mixed-grid .question:first-child,
+        .mixed-grid .question:nth-child(2) {
+            margin-top: 15px;
         }
     </style>
 </head>
