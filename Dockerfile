@@ -11,7 +11,7 @@ RUN npm ci --only=production
 COPY . .
 
 # 运行阶段
-FROM alpine:latest
+FROM alpine:3.19
 
 # 安装 Node.js、CUPS 和 ESC/P-R 驱动
 RUN apk add --no-cache \
@@ -55,7 +55,10 @@ COPY --from=builder /app/templates ./templates
 COPY --from=builder /app/entrypoint.sh /entrypoint.sh
 
 # 创建临时目录
-RUN mkdir -p /tmp/cups-pdfs
+RUN mkdir -p /tmp/cups-pdfs && chmod 1777 /tmp/cups-pdfs
+
+# 确保 entrypoint 可执行
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3000
 
