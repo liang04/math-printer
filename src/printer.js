@@ -3,7 +3,7 @@
  * EPSON L4160 使用 ESC/P-R 驱动
  */
 
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -24,13 +24,14 @@ async function writeTempFile(buffer, fileName) {
 }
 
 /**
- * 执行 shell 命令（Promise 包装）
- * @param {string} cmd - 命令
+ * 执行命令（Promise 包装，使用 execFile 避免命令注入）
+ * @param {string} file - 可执行文件
+ * @param {string[]} args - 参数数组
  * @returns {Promise<{stdout: string, stderr: string}>}
  */
-function execPromise(cmd) {
+function execFilePromise(file, args) {
     return new Promise((resolve, reject) => {
-        exec(cmd, { timeout: 30000 }, (error, stdout, stderr) => {
+        execFile(file, args, { timeout: 30000 }, (error, stdout, stderr) => {
             if (error) {
                 reject(new Error(`命令失败: ${error.message}, stderr: ${stderr}`));
                 return;
@@ -50,12 +51,12 @@ async function printPDF(pdfBuffer, jobName = 'math-worksheet') {
     const tempPath = await writeTempFile(pdfBuffer, jobName);
 
     try {
-        // 使用 lp 命令提交打印任务
+        // 使用 lp 命令提交打印任务（使用 execFile 避免命令注入）
         // CUPS + ESC/P-R 驱动会自动将 PDF 转换为打印机语言
-        const cmd = `lp -d ${PRINTER_NAME} -t "${jobName}" "${tempPath}"`;
+        const args = ['-d', PRINTER_NAME, '-t', jobName, tempPath];
 
-        console.log(`提交打印任务: ${cmd}`);
-        const { stdout } = await execPromise(cmd);
+        console.log(`提交打印任务: lp ${args.join(' ')}`);
+        const { stdout } = await execFilePromise('lp', args);
 
         // 解析 job ID
         const match = stdout.match(/request id is (\S+)/);
@@ -65,7 +66,9 @@ async function printPDF(pdfBuffer, jobName = 'math-worksheet') {
 
         // 异步删除临时文件（给 CUPS 一点时间处理）
         setTimeout(() => {
-            fs.unlink(tempPath).catch(() => {});
+            fs.unlink(tempPath).catch((err) => {
+                console.warn(`清理临时文件失败: ${tempPath}`, err.message);
+            });
         }, 60000);
 
         return {
@@ -75,7 +78,9 @@ async function printPDF(pdfBuffer, jobName = 'math-worksheet') {
         };
     } catch (err) {
         // 清理临时文件
-        fs.unlink(tempPath).catch(() => {});
+        fs.unlink(tempPath).catch((err) => {
+            console.warn(`清理临时文件失败: ${tempPath}`, err.message);
+        });
         throw err;
     }
 }
@@ -86,7 +91,7 @@ async function printPDF(pdfBuffer, jobName = 'math-worksheet') {
  */
 async function checkPrinterStatus() {
     try {
-        const { stdout } = await execPromise(`lpstat -p ${PRINTER_NAME}`);
+        const { stdout } = await execFilePromise('lpstat', ['-p', PRINTER_NAME]);
 
         if (stdout.includes('is idle')) {
             return { connected: true, state: 'idle' };
