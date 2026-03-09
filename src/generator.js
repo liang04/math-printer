@@ -107,20 +107,28 @@ function generateMixed() {
 /**
  * 生成完整试卷
  * @param {Object} options
- * @param {number} options.questionCount - 口算题数量 (默认 26)
- * @param {number} options.mixedCount - 混合运算题数量 (默认 8)
+ * @param {number} options.level - 难度等级 (1-18)，默认 1
+ *   - Level 1: 34道简单算式
+ *   - Level 2: 32道简单 + 2道混合
+ *   - Level 3: 30道简单 + 4道混合
+ *   - 每增加1级，混合运算增加2道，简单算式减少2道
  * @returns {Object} { oral: [], mixed: [] }
  */
 function generateWorksheet(options = {}) {
-  const questionCount = options.questionCount || 26;
-  const mixedCount = options.mixedCount || 8;
+  const TOTAL_QUESTIONS = 34;
+  const level = Math.max(1, Math.min(18, options.level || 1));
+
+  // 根据 level 计算混合运算和简单算式数量
+  // Level 1: 0道混合, Level 2: 2道混合, Level 3: 4道混合...
+  const mixedCount = (level - 1) * 2;
+  const oralCount = TOTAL_QUESTIONS - mixedCount;
 
   const oral = [];
 
   // 分配口算题: 乘除法各 1 道，其余分配给加减法
   const multiplicationCount = 1;
   const divisionCount = 1;
-  const remainingCount = questionCount - multiplicationCount - divisionCount;
+  const remainingCount = oralCount - multiplicationCount - divisionCount;
   const additionCount = Math.floor(remainingCount / 2);
   const subtractionCount = remainingCount - additionCount;
 
@@ -152,9 +160,11 @@ module.exports = { generateWorksheet, shuffle };
 
 // 手动测试
 if (require.main === module) {
-  const worksheet = generateWorksheet({ questionCount: 26, mixedCount: 8 });
-  console.log('口算题 (26道):');
-  worksheet.oral.forEach((q, i) => console.log(`${i + 1}. ${q.text} = ${q.answer}`));
-  console.log('\n混合运算 (8道):');
-  worksheet.mixed.forEach((q, i) => console.log(`${i + 1}. ${q.text} = ${q.answer}`));
+  // 测试不同 level
+  for (let level = 1; level <= 5; level++) {
+    const worksheet = generateWorksheet({ level });
+    const mixedCount = (level - 1) * 2;
+    const oralCount = 34 - mixedCount;
+    console.log(`\n=== Level ${level}: ${oralCount}道简单 + ${mixedCount}道混合 = 34道总计 ===`);
+  }
 }

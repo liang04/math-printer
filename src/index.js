@@ -28,8 +28,7 @@ app.post('/api/print', async (req, res) => {
   try {
     const {
       count = 1,
-      questions = 26,
-      mixedCount = 8,
+      level = 1,
       title = '数学口算练习'
     } = req.body;
 
@@ -40,16 +39,10 @@ app.post('/api/print', async (req, res) => {
         error: '打印份数必须在 1-10 之间'
       });
     }
-    if (questions < 1 || questions > 100) {
+    if (level < 1 || level > 18) {
       return res.status(400).json({
         success: false,
-        error: '题目数量必须在 1-100 之间'
-      });
-    }
-    if (mixedCount < 0 || mixedCount > 20) {
-      return res.status(400).json({
-        success: false,
-        error: '混合运算题数必须在 0-20 之间'
+        error: '难度等级必须在 1-18 之间'
       });
     }
 
@@ -58,7 +51,7 @@ app.post('/api/print', async (req, res) => {
 
     // 生成并打印
     for (let i = 0; i < count; i++) {
-      const worksheet = generateWorksheet({ questionCount: questions, mixedCount });
+      const worksheet = generateWorksheet({ level });
       worksheet.title = count > 1 ? `${title} (${i + 1}/${count})` : title;
 
       const pdf = await generatePDF(worksheet);
@@ -66,11 +59,19 @@ app.post('/api/print', async (req, res) => {
       results.push(printResult);
     }
 
+    // 计算题目数量用于返回信息
+    const mixedCount = (level - 1) * 2;
+    const oralCount = 34 - mixedCount;
+
     res.json({
       success: true,
       jobId,
       message: `打印任务已提交，共 ${count} 份`,
       copies: count,
+      level,
+      oralCount,
+      mixedCount,
+      totalCount: 34,
       printerJobs: results.map(r => r.jobId)
     });
 
@@ -87,12 +88,18 @@ app.post('/api/print', async (req, res) => {
 app.post('/api/preview', async (req, res) => {
   try {
     const {
-      questions = 26,
-      mixedCount = 8,
+      level = 1,
       title = '数学口算练习'
     } = req.body;
 
-    const worksheet = generateWorksheet({ questionCount: questions, mixedCount });
+    if (level < 1 || level > 18) {
+      return res.status(400).json({
+        success: false,
+        error: '难度等级必须在 1-18 之间'
+      });
+    }
+
+    const worksheet = generateWorksheet({ level });
     worksheet.title = title;
 
     const pdf = await generatePDF(worksheet);
