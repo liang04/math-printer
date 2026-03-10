@@ -9,8 +9,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    # 使用 host 网络模式，使容器可以访问局域网打印机
-    network_mode: host
+    # 使用 bridge 网络模式（默认）
+    # 注意：需要确保容器能路由到打印机 IP
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - /var/run/dbus:/var/run/dbus
