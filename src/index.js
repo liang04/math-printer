@@ -27,18 +27,11 @@ app.get('/health', async (req, res) => {
 app.post('/api/print', async (req, res) => {
   try {
     const {
-      count = 1,
       level = 5,
       title = '数学口算练习'
     } = req.body;
 
     // 参数验证
-    if (count < 1 || count > 10) {
-      return res.status(400).json({
-        success: false,
-        error: '打印份数必须在 1-10 之间'
-      });
-    }
     if (level < 1 || level > 18) {
       return res.status(400).json({
         success: false,
@@ -47,17 +40,13 @@ app.post('/api/print', async (req, res) => {
     }
 
     const jobId = uuidv4();
-    const results = [];
 
-    // 生成并打印
-    for (let i = 0; i < count; i++) {
-      const worksheet = generateWorksheet({ level });
-      worksheet.title = count > 1 ? `${title} (${i + 1}/${count})` : title;
+    // 生成并打印一份
+    const worksheet = generateWorksheet({ level });
+    worksheet.title = title;
 
-      const pdf = await generatePDF(worksheet);
-      const printResult = await printPDF(pdf, `worksheet-${jobId}-${i + 1}`);
-      results.push(printResult);
-    }
+    const pdf = await generatePDF(worksheet);
+    const printResult = await printPDF(pdf, `worksheet-${jobId}`);
 
     // 计算题目数量用于返回信息
     const mixedCount = (level - 1) * 2;
@@ -66,13 +55,12 @@ app.post('/api/print', async (req, res) => {
     res.json({
       success: true,
       jobId,
-      message: `打印任务已提交，共 ${count} 份`,
-      copies: count,
+      message: '打印任务已提交',
       level,
       oralCount,
       mixedCount,
       totalCount: 34,
-      printerJobs: results.map(r => r.jobId)
+      printerJob: printResult.jobId
     });
 
   } catch (err) {
