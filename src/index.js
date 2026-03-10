@@ -28,7 +28,7 @@ app.post('/api/print', async (req, res) => {
   try {
     const {
       count = 1,
-      level = 1,
+      level = 5,
       title = '数学口算练习'
     } = req.body;
 
@@ -88,7 +88,7 @@ app.post('/api/print', async (req, res) => {
 app.post('/api/preview', async (req, res) => {
   try {
     const {
-      level = 1,
+      level = 5,
       title = '数学口算练习'
     } = req.body;
 
