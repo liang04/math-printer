@@ -7,7 +7,6 @@
 - 生成 100 以内加减法、表内乘除法题目
 - 生成含运算优先级的混合运算题
 - 支持难度等级（level 1-18），总题数固定 34 道
-- 支持指定打印份数
 - 使用 CUPS + ESC/P-R 驱动打印到 EPSON 打印机
 
 ## 快速开始
@@ -39,8 +38,7 @@ curl http://localhost:3000/health
 curl -X POST http://localhost:3000/api/print \
   -H "Content-Type: application/json" \
   -d '{
-    "count": 1,
-    "level": 1,
+    "level": 5,
     "title": "数学口算练习"
   }'
 ```
@@ -49,8 +47,7 @@ curl -X POST http://localhost:3000/api/print \
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `count` | number | 1 | 打印份数 (1-10) |
-| `level` | number | 1 | 难度等级 (1-18)，每级增加 2 道混合运算 |
+| `level` | number | 5 | 难度等级 (1-18)，每级增加 2 道混合运算 |
 | `title` | string | "数学口算练习" | 试卷标题 |
 
 **难度等级**
@@ -68,7 +65,7 @@ curl -X POST http://localhost:3000/api/print \
 ```bash
 curl -X POST http://localhost:3000/api/preview \
   -H "Content-Type: application/json" \
-  -d '{"level": 3}' \
+  -d '{"level": 5}' \
   -o worksheet.pdf
 ```
 
